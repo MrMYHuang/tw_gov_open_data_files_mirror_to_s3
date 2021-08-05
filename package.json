@@ -1,17 +1,18 @@
 {
-  "name": "twri_file_mirror_to_s3",
+  "name": "tw_gov_open_data_files_mirror_to_s3",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "pack": "zip -r a.zip params.json package.json index.js dist node_modules",
+    "pack": "rm a.zip && zip -r a.zip params.json package.json index.js dist node_modules",
     "start": "node index.js",
     "test": "node test.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "adm-zip": "^0.5.5",
     "aws-sdk": "^2.929.0",
     "axios": "^0.21.1",
     "typescript": "^4.3.2"

@@ -1,9 +1,12 @@
 import AWS from 'aws-sdk';
+import AdmZip from 'adm-zip';
 import axios from 'axios';
 import params from './params.json';
 
-let twrDataUrl = `https://data.wra.gov.tw/Service/OpenData.aspx?format=json&id=50C8256D-30C5-4B8D-9B84-2E14D5C6DF71`;
-let twrWaterDataUrl = `https://data.wra.gov.tw/Service/OpenData.aspx?format=json&id=1602CA19-B224-4CC3-AA31-11B1B124530F`;
+const data = [
+  { name: 'charge_station_list', url: 'https://www.gsp.gov.tw/iTaiwan/charge_station_list.csv' },
+  { name: 'hotspotlist', url: 'https://itaiwan.gov.tw/downloads/zh-TW/hotspotlist.csv' },
+];
 
 const s3bucket = new AWS.S3({
   accessKeyId: params.IAM_USER_KEY,
@@ -39,15 +42,16 @@ async function uploadObjectToS3Bucket(objectName: string, objectData: any) {
 }
 
 export async function fileMirroringToS3() {
-  try {
-    const data = await downloadSource(twrDataUrl);
-    await uploadObjectToS3Bucket('twrData.json', data);
-
-    const dataWater = await downloadSource(twrWaterDataUrl);
-    await uploadObjectToS3Bucket('twrDataWater.json', dataWater);
-
-    console.log(`File mirroring success!`);
-  } catch (err) {
-    console.error(`File mirroring failed: ` + err);
+  for (let i = 0; i < data.length; i++) {
+    try {
+      const datum = data[i];
+      const downloadData = await downloadSource(datum.url);
+      const zip = new AdmZip();
+      zip.addFile(datum.name, downloadData);
+      await uploadObjectToS3Bucket(`${datum.name}.zip`, zip.toBuffer());
+      console.log(`File mirroring success!`);
+    } catch (err) {
+      console.error(`File mirroring failed: ` + err);
+    }
   }
 }
