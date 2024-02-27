@@ -4,7 +4,7 @@ import axios from 'axios';
 import params from './params.json';
 
 const data = [
-  { name: 'charge_station_list', url: 'https://www.gsp.gov.tw/iTaiwan/charge_station_list.csv', isZip: false },
+  { name: 'charge_station_list', url: 'https://itaiwan.gov.tw/ITaiwanDW/GetFile?fileName=charge_station_list.csv&type=6', isZip: false },
   { name: 'hotspotlist', url: 'https://itaiwan.gov.tw/ITaiwanDW/GetFile?fileName=hotspotlist_tw.csv&type=6', isZip: false },
 ];
 

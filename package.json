@@ -1,6 +1,6 @@
 {
   "name": "tw_gov_open_data_files_mirror_to_s3",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
