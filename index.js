@@ -1,10 +1,10 @@
-const lib = require('./dist/fileMirroringToS3');
+import { fileMirroringToS3 } from './dist/fileMirroringToS3.js';
 
 // For Amazon AWS Lambda.
-exports.handler = async (event) => {
+export const handler = async () => {
   let response;
   try {
-      await lib.fileMirroringToS3();
+      await fileMirroringToS3();
       response = {
           statusCode: 200,
           body: JSON.stringify('Success!'),
