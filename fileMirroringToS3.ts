@@ -10,9 +10,8 @@ import {
   isSourceFreeChargingItem,
   isSourceFreeWifiItem,
 } from './SourceModels.js';
-
 const require = createRequire(import.meta.url);
-const params = require('./params.json');
+const params = require("./params.json");
 
 const data = [
   { name: 'charge_station_list', url: 'https://itaiwan.gov.tw/ITaiwanDW/GetFile?fileName=charge_station_list.csv&type=6', isZip: false },
@@ -56,22 +55,41 @@ export async function buildMappedCsvData(name: string, url: string) {
     skip_empty_lines: true,
     trim: true,
   }) as Array<Record<string, unknown>>;
-  validateDownloadData(name, parsedData);
   const normalizedSourceData = normalizeSourceData(name, parsedData);
+  validateDownloadData(name, normalizedSourceData);
   const mappedData = mapToTargetData(name, normalizedSourceData);
   return convertRowsToCsv(mappedData);
 }
 
 function normalizeSourceData(name: string, downloadData: Array<Record<string, unknown>>) {
-  if (name !== 'charge_station_list') {
-    return downloadData;
+  if (name === "charge_station_list") {
+    return downloadData.map((item) => ({
+      ...item,
+      緯度: normalizeCoordinate(item.緯度),
+      經度: normalizeCoordinate(item.經度),
+    }));
   }
 
-  return downloadData.map((item) => ({
-    ...item,
-    緯度: Number(item.緯度),
-    經度: Number(item.經度),
-  }));
+  if (name === "hotspotlist") {
+    return downloadData.map((item) => ({
+      ...item,
+      Latitude: normalizeCoordinate(item.Latitude),
+      Longitude: normalizeCoordinate(item.Longitude),
+    }));
+  }
+
+  return downloadData;
+}
+
+function normalizeCoordinate(value: unknown) {
+  if (typeof value === "number") {
+    return value;
+  }
+  if (typeof value === "string") {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : value;
+  }
+  return value;
 }
 
 function mapToTargetData(name: string, downloadData: Array<Record<string, unknown>>) {
