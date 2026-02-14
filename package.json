@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc",
     "pack": "rm -f a.zip && zip -r a.zip params.json package.json index.js dist node_modules",
+    "deploy": "./scripts/deploy-lambda.sh a.zip",
     "start": "node index.js",
     "test": "node --test dist/fileMirroringToS3.test.js"
   },
