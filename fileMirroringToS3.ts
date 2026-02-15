@@ -2,20 +2,32 @@ import AWS from 'aws-sdk';
 import AdmZip from 'adm-zip';
 import axios from 'axios';
 import parse from 'csv-parse/lib/sync.js';
-import { FreeChargingItem, FreeWifiItem } from "tfwc-data";
+import {
+  IFreeChargingItem,
+  IFreeWifiItem,
+} from "tfwc-data";
 import { createRequire } from 'node:module';
 import {
+  ISourceFreeChargingItem,
+  ISourceFreeWifiItem,
   getSourceFreeChargingItemErrors,
   getSourceFreeWifiItemErrors,
+  mapToFreeChargingItem,
+  mapToFreeWifiItem,
   isSourceFreeChargingItem,
   isSourceFreeWifiItem,
 } from './SourceModels.js';
 const require = createRequire(import.meta.url);
 const params = require("./params.json");
 
+export enum SourceDataName {
+  ChargeStationList = 'charge_station_list',
+  HotspotList = 'hotspotlist',
+}
+
 const data = [
-  { name: 'charge_station_list', url: 'https://itaiwan.gov.tw/ITaiwanDW/GetFile?fileName=charge_station_list.csv&type=6', isZip: false },
-  { name: 'hotspotlist', url: 'https://itaiwan.gov.tw/ITaiwanDW/GetFile?fileName=hotspotlist_tw.csv&type=6', isZip: false },
+  { name: SourceDataName.ChargeStationList, url: 'https://itaiwan.gov.tw/ITaiwanDW/GetFile?fileName=charge_station_list.csv&type=6', isZip: false },
+  { name: SourceDataName.HotspotList, url: 'https://itaiwan.gov.tw/ITaiwanDW/GetFile?fileName=hotspotlist_tw.csv&type=6', isZip: false },
 ];
 
 export default data;
@@ -24,6 +36,9 @@ const s3bucket = new AWS.S3({
   accessKeyId: params.IAM_USER_KEY,
   secretAccessKey: params.IAM_USER_SECRET
 });
+
+type NormalizedSourceData = Array<ISourceFreeChargingItem> | Array<ISourceFreeWifiItem>;
+type TargetData = Array<IFreeChargingItem> | Array<IFreeWifiItem>;
 
 export async function fileMirroringToS3() {
   for (let i = 0; i < data.length; i++) {
@@ -47,6 +62,10 @@ async function createZipBuffer(name: string, url: string) {
 }
 
 export async function buildMappedCsvData(name: string, url: string) {
+  if (!isSourceDataName(name)) {
+    throw new Error(`Unsupported source name: ${name}`);
+  }
+
   const downloadData = await downloadSource(url);
   const csvText = Buffer.from(downloadData).toString('utf8');
   const parsedData = parse(csvText, {
@@ -61,24 +80,27 @@ export async function buildMappedCsvData(name: string, url: string) {
   return convertRowsToCsv(mappedData);
 }
 
-function normalizeSourceData(name: string, downloadData: Array<Record<string, unknown>>) {
-  if (name === "charge_station_list") {
+function isSourceDataName(name: string): name is SourceDataName {
+  return name === SourceDataName.ChargeStationList || name === SourceDataName.HotspotList;
+}
+
+function normalizeSourceData(
+  name: SourceDataName,
+  downloadData: Array<Record<string, unknown>>,
+): NormalizedSourceData {
+  if (name === SourceDataName.ChargeStationList) {
     return downloadData.map((item) => ({
       ...item,
       緯度: normalizeCoordinate(item.緯度),
       經度: normalizeCoordinate(item.經度),
-    }));
+    })) as Array<ISourceFreeChargingItem>;
   }
 
-  if (name === "hotspotlist") {
-    return downloadData.map((item) => ({
-      ...item,
-      Latitude: normalizeCoordinate(item.Latitude),
-      Longitude: normalizeCoordinate(item.Longitude),
-    }));
-  }
-
-  return downloadData;
+  return downloadData.map((item) => ({
+    ...item,
+    Latitude: normalizeCoordinate(item.Latitude),
+    Longitude: normalizeCoordinate(item.Longitude),
+  })) as Array<ISourceFreeWifiItem>;
 }
 
 function normalizeCoordinate(value: unknown) {
@@ -92,12 +114,12 @@ function normalizeCoordinate(value: unknown) {
   return value;
 }
 
-function mapToTargetData(name: string, downloadData: Array<Record<string, unknown>>) {
-  if (name === 'charge_station_list') {
-    return downloadData.map((item) => new FreeChargingItem(item));
+function mapToTargetData(name: SourceDataName, downloadData: NormalizedSourceData): TargetData {
+  if (name === SourceDataName.ChargeStationList) {
+    return (downloadData as Array<ISourceFreeChargingItem>).map(mapToFreeChargingItem);
   }
 
-  return downloadData.map((item) => new FreeWifiItem(item));
+  return (downloadData as Array<ISourceFreeWifiItem>).map(mapToFreeWifiItem);
 }
 
 function convertRowsToCsv(rows: Array<object>) {
@@ -123,14 +145,17 @@ export async function downloadSource(url: string) {
   }
 }
 
-function validateDownloadData(name: string, downloadData: Array<Record<string, unknown>>) {
+function validateDownloadData(name: SourceDataName, downloadData: NormalizedSourceData) {
   if (!Array.isArray(downloadData) || downloadData.length === 0) {
     throw new Error(`Downloaded data is empty for ${name}`);
   }
 
-  const validator = name === 'charge_station_list' ? isSourceFreeChargingItem : isSourceFreeWifiItem;
+  const validator =
+    name === SourceDataName.ChargeStationList ? isSourceFreeChargingItem : isSourceFreeWifiItem;
   const getErrors =
-    name === 'charge_station_list' ? getSourceFreeChargingItemErrors : getSourceFreeWifiItemErrors;
+    name === SourceDataName.ChargeStationList
+      ? getSourceFreeChargingItemErrors
+      : getSourceFreeWifiItemErrors;
 
   const firstItem = downloadData[0];
   if (!validator(firstItem)) {

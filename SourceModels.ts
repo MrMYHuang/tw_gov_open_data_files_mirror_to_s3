@@ -1,4 +1,5 @@
 import Ajv from "ajv";
+import { IFreeChargingItem, IFreeWifiItem } from "tfwc-data";
 import Type from "typebox";
 
 const ajv = new Ajv({ allErrors: true });
@@ -51,3 +52,29 @@ export const getSourceFreeChargingItemErrors = () =>
 
 export const getSourceFreeWifiItemErrors = () =>
   validateSourceFreeWifiItem.errors;
+
+export const mapToFreeChargingItem = (
+  item: ISourceFreeChargingItem,
+): IFreeChargingItem => ({
+  主管機關: item.主管機關,
+  地區: item.地區,
+  充電站名稱: item.充電站名稱,
+  地址: item.地址,
+  緯度: +item.緯度,
+  經度: +item.經度,
+});
+
+export const mapToFreeWifiItem = (item: ISourceFreeWifiItem): IFreeWifiItem => {
+  const lat = +item.Latitude;
+  const lng = +item.Longitude;
+  return {
+    主管機關: item.Ministry,
+    地區: item.Area,
+    機關: item.Agency,
+    熱點名稱: item.Name,
+    地址: item.Address,
+    管理單位: item.Administration,
+    緯度: Number.isFinite(lat) ? lat : 0,
+    經度: Number.isFinite(lng) ? lng : 0,
+  };
+};

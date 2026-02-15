@@ -1,0 +1,4 @@
+interface:
+  display_name: "Update Schema"
+  short_description: "Refresh CSV schemas and mappers"
+  default_prompt: "Use $update-schema to refresh SourceModels.ts schemas and mapper functions from the CSV URLs in fileMirroringToS3.ts."

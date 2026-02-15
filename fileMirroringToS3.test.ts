@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import parse from 'csv-parse/lib/sync.js';
 
-import data, { buildMappedCsvData } from './fileMirroringToS3.js';
+import data, { buildMappedCsvData, SourceDataName } from './fileMirroringToS3.js';
 
 test('buildMappedCsvData maps charge_station_list with network call', async () => {
-  const chargeStation = data.find((item) => item.name === 'charge_station_list');
+  const chargeStation = data.find((item) => item.name === SourceDataName.ChargeStationList);
   assert.ok(chargeStation);
-  const mappedCsvData = await buildMappedCsvData('charge_station_list', chargeStation.url);
+  const mappedCsvData = await buildMappedCsvData(SourceDataName.ChargeStationList, chargeStation.url);
   assert.ok(mappedCsvData.length > 0);
 
   const parsedData = parse(mappedCsvData, {
@@ -28,9 +28,9 @@ test('buildMappedCsvData maps charge_station_list with network call', async () =
 });
 
 test('buildMappedCsvData maps hotspotlist with network call', async () => {
-  const hotspotList = data.find((item) => item.name === 'hotspotlist');
+  const hotspotList = data.find((item) => item.name === SourceDataName.HotspotList);
   assert.ok(hotspotList);
-  const mappedCsvData = await buildMappedCsvData('hotspotlist', hotspotList.url);
+  const mappedCsvData = await buildMappedCsvData(SourceDataName.HotspotList, hotspotList.url);
   assert.ok(mappedCsvData.length > 0);
 
   const parsedData = parse(mappedCsvData, {
