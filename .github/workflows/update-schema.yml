@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  review:
+  update-schema:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -30,7 +30,7 @@ jobs:
       - name: Run Copilot
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: copilot -p "/update-schemas" -yolo
+        run: copilot -p "/update-schemas" --yolo
 
       - name: Check SourceModels.ts changes
         id: source_models_changes
