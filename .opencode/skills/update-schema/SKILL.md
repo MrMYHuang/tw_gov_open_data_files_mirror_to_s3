@@ -3,9 +3,12 @@ name: update-schema
 description: Refresh source CSV schemas and target mapping functions in SourceModels.ts from the live dataset URLs defined in fileMirroringToS3.ts. Use when asked to update SourceFreeChargingItemSchema, SourceFreeWifiItemSchema, mapToFreeChargingItem, or mapToFreeWifiItem based on current CSV columns and values.
 ---
 
+# Rules
+Don't commit any change to git repo.
+
 # Update Schema
 
-Execute this workflow for each item in `data` from `fileMirroringToS3.ts`. Don't commit any change to git repo.
+Execute this workflow for each item in `data` from `fileMirroringToS3.ts`.
 
 ## Workflow
 
