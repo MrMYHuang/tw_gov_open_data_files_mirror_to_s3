@@ -6,7 +6,7 @@ const ajv = new Ajv({ allErrors: true });
 
 export const SourceFreeChargingItemSchema = Type.Object(
   {
-    主管機: Type.String(),
+    主管機關: Type.String(),
     地區: Type.String(),
     充電站名稱: Type.String(),
     地址: Type.String(),
@@ -56,7 +56,7 @@ export const getSourceFreeWifiItemErrors = () =>
 export const mapToFreeChargingItem = (
   item: ISourceFreeChargingItem,
 ): IFreeChargingItem => ({
-  主管機關: item.主管機,
+  主管機關: item.主管機關,
   地區: item.地區,
   充電站名稱: item.充電站名稱,
   地址: item.地址,
