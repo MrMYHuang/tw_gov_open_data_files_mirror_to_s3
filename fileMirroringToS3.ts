@@ -49,7 +49,9 @@ export async function fileMirroringToS3() {
       await uploadObjectToS3Bucket(`${datum.name}.zip`, zipBuffer);
       console.log(`File mirroring success!`);
     } catch (err) {
-      console.error(`File mirroring failed: ` + err);
+      const msg = `File mirroring failed: ` + err;
+      console.error(msg);
+      throw msg;      
     }
   }
 }
@@ -193,8 +195,6 @@ async function dispatchWorkflowOnValidationError(name: SourceDataName, errorText
       body: JSON.stringify({
         ref,
         inputs: {
-          source_name: name,
-          error_message: errorText ?? "",
         },
       }),
     },
