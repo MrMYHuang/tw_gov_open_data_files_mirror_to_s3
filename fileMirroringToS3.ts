@@ -75,7 +75,7 @@ export async function buildMappedCsvData(name: string, url: string) {
     trim: true,
   }) as Array<Record<string, unknown>>;
   const normalizedSourceData = normalizeSourceData(name, parsedData);
-  validateDownloadData(name, normalizedSourceData);
+  await validateDownloadData(name, normalizedSourceData);
   const mappedData = mapToTargetData(name, normalizedSourceData);
   return convertRowsToCsv(mappedData);
 }
@@ -145,7 +145,7 @@ export async function downloadSource(url: string) {
   }
 }
 
-function validateDownloadData(name: SourceDataName, downloadData: NormalizedSourceData) {
+async function validateDownloadData(name: SourceDataName, downloadData: NormalizedSourceData) {
   if (!Array.isArray(downloadData) || downloadData.length === 0) {
     throw new Error(`Downloaded data is empty for ${name}`);
   }
@@ -162,9 +162,46 @@ function validateDownloadData(name: SourceDataName, downloadData: NormalizedSour
     const errorText = getErrors()
       ?.map((error) => `${error.instancePath || '/'} ${error.message}`)
       .join('; ');
-    throw new Error(
-      `Schema check failed for ${name} at row 1${errorText ? `: ${errorText}` : ''}`,
+    await dispatchWorkflowOnValidationError(name, errorText);
+    throw new Error(`Schema check failed for ${name} at row 1${errorText ? `: ${errorText}` : ''}`);
+  }
+}
+
+async function dispatchWorkflowOnValidationError(name: SourceDataName, errorText?: string) {
+  const token = params.GITHUB_TOKEN;
+  const owner = params.GITHUB_OWNER;
+  const repo = params.GITHUB_REPO;
+  const workflowFile = params.GITHUB_WORKFLOW_FILE;
+  const ref = params.GITHUB_DISPATCH_REF ?? "main";
+
+  if (!token || !owner || !repo || !workflowFile) {
+    console.warn(
+      "Skipping workflow dispatch. Required params: GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO, GITHUB_WORKFLOW_FILE.",
     );
+    return;
+  }
+
+  const response = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflowFile}/dispatches`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        ref,
+        inputs: {
+          source_name: name,
+          error_message: errorText ?? "",
+        },
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.text();
+    console.warn(`Workflow dispatch failed with ${response.status}: ${body}`);
   }
 }
 

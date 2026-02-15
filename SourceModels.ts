@@ -56,7 +56,7 @@ export const getSourceFreeWifiItemErrors = () =>
 export const mapToFreeChargingItem = (
   item: ISourceFreeChargingItem,
 ): IFreeChargingItem => ({
-  主管機關: item.主管機關,
+  主管機關: item.主管機,
   地區: item.地區,
   充電站名稱: item.充電站名稱,
   地址: item.地址,
