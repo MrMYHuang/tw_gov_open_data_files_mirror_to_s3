@@ -18,7 +18,7 @@ import {
   isSourceFreeWifiItem,
 } from './SourceModels.js';
 const require = createRequire(import.meta.url);
-import params from './params.json';
+import params from './params.json' with { type: 'json' };
 //const params = require("./params.json");
 
 export enum SourceDataName {
