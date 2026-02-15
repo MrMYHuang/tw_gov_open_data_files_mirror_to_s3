@@ -4,7 +4,8 @@ description: Refresh source CSV schemas and target mapping functions in SourceMo
 ---
 
 # Rules
-Don't commit any change to git repo.
+1. Allow to edit files.
+2. Deny committing any change to git repo.
 
 # Update Schema
 
