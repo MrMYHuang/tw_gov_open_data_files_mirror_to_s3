@@ -41,6 +41,12 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - uses: aws-actions/configure-aws-credentials@v4
+        if: steps.source_models_changes.outputs.changed == 'true'
+        with:
+          role-to-assume: arn:aws:iam::513539428904:role/github-lambda
+          aws-region: ap-northeast-1
+
       - name: Commit SourceModels.ts
         if: steps.source_models_changes.outputs.changed == 'true'
         env:
@@ -48,9 +54,12 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
+          npm i
+          npm run deploy
+          npm version patch --no-git-tag-version
           git config user.name "github-actions[bot]"
           git config user.email "myh@live.com"
-          git add SourceModels.ts
+          git add .
           git commit -m "update schema"
           git push origin dev
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
