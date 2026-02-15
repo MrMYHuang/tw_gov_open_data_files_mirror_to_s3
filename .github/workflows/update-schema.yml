@@ -56,10 +56,10 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           chmod +x ./scripts/deploy-lambda.sh
+          npm version patch --no-git-tag-version
           npm i
           npm run build
           npm run deploy
-          npm version patch --no-git-tag-version
           git config user.name "github-actions[bot]"
           git config user.email "myh@live.com"
           git add .
