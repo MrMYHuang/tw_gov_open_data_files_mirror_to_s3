@@ -6,12 +6,12 @@ const ajv = new Ajv({ allErrors: true });
 
 export const SourceFreeChargingItemSchema = Type.Object(
   {
-    機關: Type.String(),
-    地: Type.String(),
-    充: Type.String(),
-    址: Type.String(),
-    度: Type.Union([Type.Number(), Type.String()]),
-    經: Type.Union([Type.Number(), Type.String()]),
+    主管機關: Type.String(),
+    地區: Type.String(),
+    充電站名稱: Type.String(),
+    地址: Type.String(),
+    緯度: Type.Union([Type.Number(), Type.String()]),
+    經度: Type.Union([Type.Number(), Type.String()]),
   },
   { additionalProperties: false },
 );
@@ -60,8 +60,8 @@ export const mapToFreeChargingItem = (
   地區: item.地區,
   充電站名稱: item.充電站名稱,
   地址: item.地址,
-  緯度: +item.緯度,
-  經度: +item.經度,
+  緯度: typeof item.緯度 === 'string' ? +item.緯度 : item.緯度,
+  經度: typeof item.經度 === 'string' ? +item.經度 : item.經度,
 });
 
 export const mapToFreeWifiItem = (item: ISourceFreeWifiItem): IFreeWifiItem => {
