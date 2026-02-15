@@ -24,7 +24,7 @@ Execute this workflow for each item in `data` from `fileMirroringToS3.ts`.
 7. Keep existing style unless data forces change:
    - Preserve TypeBox object schema structure and `additionalProperties: false`.
    - Preserve mapper output contracts (`IFreeChargingItem`, `IFreeWifiItem`).
-8. Run project build to validate TypeScript after edits.
+8. Finish. Don't run other commands.
 
 ## Output Requirements
 
@@ -33,4 +33,3 @@ Execute this workflow for each item in `data` from `fileMirroringToS3.ts`.
   - Which source URLs were processed.
   - Which schema fields changed.
   - Which mapping fields changed.
-  - Build/test result.
