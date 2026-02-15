@@ -33,33 +33,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: copilot -p "/update-schemas" --yolo --model gpt-5-mini
 
-      - name: Upload workspace artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: update-schema-workspace
-          path: .
-          include-hidden-files: true
-
-  update-schema-post:
-    needs: update-schema
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: write
-      pull-requests: write
-
-    steps:
-      - name: Download workspace artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: update-schema-workspace
-          path: .
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
       - name: Check SourceModels.ts changes
         id: source_models_changes
         run: |
