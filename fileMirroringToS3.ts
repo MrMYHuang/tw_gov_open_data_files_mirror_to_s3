@@ -18,7 +18,8 @@ import {
   isSourceFreeWifiItem,
 } from './SourceModels.js';
 const require = createRequire(import.meta.url);
-const params = require("./params.json");
+import params from './params.json';
+//const params = require("./params.json");
 
 export enum SourceDataName {
   ChargeStationList = 'charge_station_list',
@@ -172,7 +173,7 @@ async function dispatchWorkflowOnValidationError(name: SourceDataName, errorText
   const owner = params.GITHUB_OWNER;
   const repo = params.GITHUB_REPO;
   const workflowFile = params.GITHUB_WORKFLOW_FILE;
-  const ref = params.GITHUB_DISPATCH_REF ?? "main";
+  const ref = "main";
 
   if (!token || !owner || !repo || !workflowFile) {
     console.warn(
