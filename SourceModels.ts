@@ -6,12 +6,12 @@ const ajv = new Ajv({ allErrors: true });
 
 export const SourceFreeChargingItemSchema = Type.Object(
   {
-    主管機關: Type.String(),
-    地區: Type.String(),
-    充電站名稱: Type.String(),
-    地址: Type.String(),
-    緯度: Type.Union([Type.Number(), Type.String()]),
-    經度: Type.Union([Type.Number(), Type.String()]),
+    機關: Type.String(),
+    地: Type.String(),
+    充: Type.String(),
+    址: Type.String(),
+    度: Type.Union([Type.Number(), Type.String()]),
+    經: Type.Union([Type.Number(), Type.String()]),
   },
   { additionalProperties: false },
 );
