@@ -57,6 +57,7 @@ jobs:
         run: |
           chmod +x ./scripts/deploy-lambda.sh
           npm i
+          npm run build
           npm run deploy
           npm version patch --no-git-tag-version
           git config user.name "github-actions[bot]"
