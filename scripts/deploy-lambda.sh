@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-rm -f a.zip
-zip -r a.zip params.json package.json index.js dist node_modules
 
 REGION="${AWS_REGION:-ap-northeast-1}"
 FUNCTION_NAME="${LAMBDA_FUNCTION_NAME:-MirroringTwOpenDataToS3}"

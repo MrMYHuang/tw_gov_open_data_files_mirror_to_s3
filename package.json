@@ -5,10 +5,12 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
-    "deploy": "./scripts/deploy-lambda.sh a.zip",
+    "build": "rm -rf dist && tsc",
+    "pack": "npm run build && rm -f a.zip && zip -r a.zip params.json package.json index.js dist node_modules",
+    "deploy": "npm run pack && ./scripts/deploy-lambda.sh a.zip",
     "start": "node index.js",
-    "test": "node --test dist/fileMirroringToS3.test.js"
+    "test": "npm run build && node --test dist/fileMirroringToS3.test.js",
+    "test:integration": "npm run build && node --test dist/fileMirroringToS3.integration.test.js"
   },
   "author": "",
   "license": "ISC",

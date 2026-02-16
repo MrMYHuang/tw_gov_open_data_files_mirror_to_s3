@@ -37,6 +37,7 @@ const s3bucket = new AWS.S3({
   accessKeyId: params.IAM_USER_KEY,
   secretAccessKey: params.IAM_USER_SECRET
 });
+let s3bucketForObjectsPromise: Promise<AWS.S3> | null = null;
 
 type NormalizedSourceData = Array<ISourceFreeChargingItem> | Array<ISourceFreeWifiItem>;
 type TargetData = Array<IFreeChargingItem> | Array<IFreeWifiItem>;
@@ -207,14 +208,14 @@ async function dispatchWorkflowOnValidationError(name: SourceDataName, errorText
 }
 
 async function uploadObjectToS3Bucket(objectName: string, objectData: any) {
+  const s3client = await getS3BucketClient();
   return new Promise<void>((ok, fail) => {
     const s3params: AWS.S3.PutObjectRequest = {
       Bucket: params.BUCKET_NAME,
       Key: objectName,
-      Body: objectData,
-      ACL: 'public-read'
+      Body: objectData
     };
-    s3bucket.upload(s3params, function (err: Error, data: { Location: any; }) {
+    s3client.upload(s3params, function (err: Error, data: { Location: any; }) {
       if (err) {
         fail(err);
         return;
@@ -223,4 +224,36 @@ async function uploadObjectToS3Bucket(objectName: string, objectData: any) {
       ok();
     });
   });
+}
+
+async function getS3BucketClient() {
+  if (s3bucketForObjectsPromise) {
+    return s3bucketForObjectsPromise;
+  }
+
+  s3bucketForObjectsPromise = (async () => {
+    const location = await s3bucket
+      .getBucketLocation({ Bucket: params.BUCKET_NAME })
+      .promise();
+
+    const bucketRegion = normalizeBucketRegion(location.LocationConstraint);
+
+    return new AWS.S3({
+      accessKeyId: params.IAM_USER_KEY,
+      secretAccessKey: params.IAM_USER_SECRET,
+      region: bucketRegion,
+    });
+  })();
+
+  return s3bucketForObjectsPromise;
+}
+
+function normalizeBucketRegion(locationConstraint?: string) {
+  if (!locationConstraint) {
+    return "us-east-1";
+  }
+  if (locationConstraint === "EU") {
+    return "eu-west-1";
+  }
+  return locationConstraint;
 }

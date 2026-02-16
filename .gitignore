@@ -3,3 +3,7 @@ dist
 a.zip
 .DS_Store
 params.json
+terraform/.terraform/
+terraform/out
+terraform/terraform.tfstate.backup
+terraform/terraform.tfstate
