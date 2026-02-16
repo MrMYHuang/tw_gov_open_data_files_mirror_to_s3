@@ -41,9 +41,6 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 
 locals {
   effective_lambda_role_arn = var.create_lambda_role ? aws_iam_role.lambda_exec[0].arn : var.lambda_role_arn
-  params_json               = jsondecode(file("${path.module}/../params.json"))
-  cloudfront_bucket_name    = local.params_json.BUCKET_NAME
-  cloudfront_origin_domain  = "${local.cloudfront_bucket_name}.s3.${var.aws_region}.amazonaws.com"
 }
 
 resource "aws_lambda_function" "mirror" {
@@ -95,47 +92,4 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   function_name = aws_lambda_function.mirror.function_name
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.schedule[0].arn
-}
-
-resource "aws_cloudfront_distribution" "s3mrmyhuang" {
-  enabled         = true
-  is_ipv6_enabled = true
-  comment         = ""
-  price_class     = "PriceClass_All"
-  http_version    = "http2"
-
-  origin {
-    domain_name = local.cloudfront_origin_domain
-    origin_id   = local.cloudfront_origin_domain
-
-    connection_attempts = 3
-    connection_timeout  = 10
-
-    s3_origin_config {
-      origin_access_identity = ""
-    }
-
-  }
-
-  default_cache_behavior {
-    target_origin_id           = local.cloudfront_origin_domain
-    viewer_protocol_policy     = "allow-all"
-    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
-    cached_methods             = ["GET", "HEAD"]
-    compress                   = true
-    smooth_streaming           = false
-    cache_policy_id            = "4c04afaf-71c8-42b3-8059-3b4f85d9be23"
-    origin_request_policy_id   = "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
-    response_headers_policy_id = "5cc3b908-e619-4b99-88e5-2cf7f45965bd"
-  }
-
-  restrictions {
-    geo_restriction {
-      restriction_type = "none"
-    }
-  }
-
-  viewer_certificate {
-    cloudfront_default_certificate = true
-  }
 }
