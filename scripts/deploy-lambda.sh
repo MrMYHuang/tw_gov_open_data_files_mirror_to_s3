@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-REGION="${AWS_REGION:-ap-northeast-1}"
+REGION="${AWS_REGION:-ap-east-2}"
 FUNCTION_NAME="${LAMBDA_FUNCTION_NAME:-MirroringTwOpenDataToS3}"
 ZIP_PATH="${1:-a.zip}"
 
