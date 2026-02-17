@@ -52,7 +52,8 @@ export async function fileMirroringToS3() {
     } catch (err) {
       const msg = `File mirroring failed: ` + err;
       console.error(msg);
-      throw msg;      
+      // Don't rethrow to avoiding frequent retries.
+      //throw msg;      
     }
   }
 }
